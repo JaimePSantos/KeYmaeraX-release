@@ -662,9 +662,9 @@ class MathematicaODESolverTool(override val link: MathematicaLink) extends BaseK
 class MathematicaPDESolverTool(override val link: MathematicaLink) extends BaseKeYmaeraMathematicaBridge[KExpr](link, new UncheckedBaseK2MConverter, new DiffUncheckedM2KConverter) with PDESolverTool {
 
   def pdeSolve(diffSys: DifferentialProgram): Iterator[Term] = {
-    val vars = DifferentialHelper.getPrimedVariables(diffSys).map(k2m).toArray
+    val vars = DifferentialHelper.getPrimedVariables(diffSys).map(k2m)
     val f = MathematicaOpSpec.symbol(DiffUncheckedM2KConverter.PREFIX + "f")
-    val fall = new MExpr(f, vars)
+    val fall = new MExpr(f, vars:_*)
     val characteristics:List[MExpr] = DifferentialHelper.atomicOdes(diffSys).map({
       case AtomicODE(DifferentialSymbol(x),t) =>
         MathematicaOpSpec.times(k2m(t), ExtMathematicaOpSpec.d(fall, k2m(x)))

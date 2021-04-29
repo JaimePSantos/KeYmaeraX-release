@@ -232,7 +232,7 @@ class MathematicaConversionTests extends FlatSpec with Matchers with BeforeAndAf
   it should "associate correctly" in {
     round trip "\\forall x ((x<=y & y<=z) & z<0)".asFormula
     KeYmaeraToMathematica("5--2".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Subtract"),
-      Array(new MExpr(BigInt(5).bigInteger), new MExpr(BigInt(-2).bigInteger)))
+      Array(new MExpr(BigInt(5).bigInteger), new MExpr(BigInt(-2).bigInteger)):_*)
   }
 
   it should "convert Apply()" in {
@@ -262,13 +262,13 @@ class MathematicaConversionTests extends FlatSpec with Matchers with BeforeAndAf
 
   "KeYmaera -> Mathematica" should "convert Apply" in {
     val in = FuncOf(Function("y", None, Real, Real), Variable("x"))
-    val expected = new MExpr(new MExpr(Expr.SYMBOL, "kyx`y"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")))
+    val expected = new MExpr(new MExpr(Expr.SYMBOL, "kyx`y"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")):_*)
     KeYmaeraToMathematica(in) should be (expected)
   }
 
   it should "convert parameterless Apply()" in {
     val in = FuncOf(Function("y", None, Unit, Real), Nothing)
-    KeYmaeraToMathematica(in) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`y"), Array[MExpr]())
+    KeYmaeraToMathematica(in) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`y"), Array[MExpr]():_*)
   }
 
   it should "convert variables to symbols" in {
@@ -280,7 +280,7 @@ class MathematicaConversionTests extends FlatSpec with Matchers with BeforeAndAf
     val in = FuncOf(Function("f", None, Tuple(Real, Tuple(Real, Real)), Real), Pair(Variable("x"), Pair(Variable("y"), Variable("z"))))
     val expected = new MExpr(new MExpr(Expr.SYMBOL, "kyx`f"),
         Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYM_LIST, Array[MExpr](
-            new MExpr(Expr.SYMBOL, "kyx`y"), new MExpr(Expr.SYMBOL, "kyx`z")))))
+            new MExpr(Expr.SYMBOL, "kyx`y"), new MExpr(Expr.SYMBOL, "kyx`z")):_*)):_*)
     println(expected.toString)
     KeYmaeraToMathematica(in) should be (expected)
   }
@@ -293,9 +293,9 @@ class MathematicaConversionTests extends FlatSpec with Matchers with BeforeAndAf
     the [CoreException] thrownBy KeYmaeraToMathematica("max(x,y)".asTerm) should have message
       "Core requirement failed: Interpreted functions not allowed in soundness-critical conversion to Mathematica"
     Configuration.set(Configuration.Keys.QE_ALLOW_INTERPRETED_FNS, "true", saveToFile = false)
-    KeYmaeraToMathematica("abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")))
-    KeYmaeraToMathematica("min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
-    KeYmaeraToMathematica("max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
+    KeYmaeraToMathematica("abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")):_*)
+    KeYmaeraToMathematica("min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
+    KeYmaeraToMathematica("max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
   }
 
   it should "distinguish uninterpreted names from interpreted ones by namespace" in {
@@ -303,29 +303,29 @@ class MathematicaConversionTests extends FlatSpec with Matchers with BeforeAndAf
     KeYmaeraToMathematica(Variable("abs")) shouldBe new MExpr(Expr.SYMBOL, "kyx`abs")
     KeYmaeraToMathematica(Variable("Abs")) shouldBe new MExpr(Expr.SYMBOL, "kyx`Abs")
     a [CoreException] should be thrownBy KeYmaeraToMathematica("abs()".asTerm)
-    KeYmaeraToMathematica("Abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")))
-    KeYmaeraToMathematica("abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")))
+    KeYmaeraToMathematica("Abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")):_*)
+    KeYmaeraToMathematica("abs(x)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Abs"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x")):_*)
     a [CoreException] should be thrownBy KeYmaeraToMathematica("abs(x,y)".asTerm)
     KeYmaeraToMathematica(Variable("min")) shouldBe new MExpr(Expr.SYMBOL, "kyx`min")
     KeYmaeraToMathematica(Variable("Min")) shouldBe new MExpr(Expr.SYMBOL, "kyx`Min")
     a [CoreException] should be thrownBy KeYmaeraToMathematica("min(x)".asTerm)
-    KeYmaeraToMathematica("Min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
-    KeYmaeraToMathematica("min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
+    KeYmaeraToMathematica("Min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
+    KeYmaeraToMathematica("min(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Min"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
     a [CoreException] should be thrownBy KeYmaeraToMathematica("min(x,y,z)".asTerm)
     KeYmaeraToMathematica(Variable("max")) shouldBe new MExpr(Expr.SYMBOL, "kyx`max")
     KeYmaeraToMathematica(Variable("Max")) shouldBe new MExpr(Expr.SYMBOL, "kyx`Max")
     a [CoreException] should be thrownBy KeYmaeraToMathematica("max(x)".asTerm)
-    KeYmaeraToMathematica("Max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
-    KeYmaeraToMathematica("max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")))
+    KeYmaeraToMathematica("Max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "kyx`Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
+    KeYmaeraToMathematica("max(x,y)".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Max"), Array[MExpr](new MExpr(Expr.SYMBOL, "kyx`x"), new MExpr(Expr.SYMBOL, "kyx`y")):_*)
     a [CoreException] should be thrownBy KeYmaeraToMathematica("max(x,y,z)".asTerm)
   }
 
   it should "convert decimal to rational" in {
-    KeYmaeraToMathematica("0.1".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(1).bigInteger), new MExpr(BigInt(10).bigInteger)))
+    KeYmaeraToMathematica("0.1".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(1).bigInteger), new MExpr(BigInt(10).bigInteger)):_*)
     MathematicaToKeYmaera(KeYmaeraToMathematica("0.1".asTerm) ) shouldBe "1/10".asTerm
-    KeYmaeraToMathematica("1.5".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(15).bigInteger), new MExpr(BigInt(10).bigInteger)))
+    KeYmaeraToMathematica("1.5".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(15).bigInteger), new MExpr(BigInt(10).bigInteger)):_*)
     MathematicaToKeYmaera(KeYmaeraToMathematica("1.5".asTerm) ) shouldBe "15/10".asTerm
-    KeYmaeraToMathematica("3.033".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(3033).bigInteger), new MExpr(BigInt(1000).bigInteger)))
+    KeYmaeraToMathematica("3.033".asTerm) shouldBe new MExpr(new MExpr(Expr.SYMBOL, "Rational"), Array(new MExpr(BigInt(3033).bigInteger), new MExpr(BigInt(1000).bigInteger)):_*)
     MathematicaToKeYmaera(KeYmaeraToMathematica("3.033".asTerm) ) shouldBe "3033/1000".asTerm
   }
 

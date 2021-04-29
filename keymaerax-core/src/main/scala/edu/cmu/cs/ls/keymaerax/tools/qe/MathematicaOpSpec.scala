@@ -25,7 +25,7 @@ case class LiteralMathOpSpec(op: Expr) extends MathematicaOpSpec {
 /** Unary Math operators. */
 case class UnaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
   /** Creates a Mathematica expression with argument `e`. */
-  def apply(e: Expr): Expr = new Expr(op, Array[Expr](e))
+  def apply(e: Expr): Expr = new Expr(op, Array[Expr](e):_*)
   /** @inheritdoc */
   override def applies(e: Expr): Boolean = e.head == op
 }
@@ -33,7 +33,7 @@ case class UnaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
 /** Binary Math operators. */
 case class BinaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
   /** Creates a Mathematica expression with argument `e`. */
-  def apply(l: Expr, r: Expr): Expr = new Expr(op, Array[Expr](l, r))
+  def apply(l: Expr, r: Expr): Expr = new Expr(op, Array[Expr](l, r):_*)
   /** @inheritdoc */
   override def applies(e: Expr): Boolean = e.head == op
 }
@@ -41,7 +41,7 @@ case class BinaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
 /** Nary Math operators. */
 case class NaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
   /** Creates a Mathematica expression with argument `e`. */
-  def apply(args: Expr*): Expr = new Expr(op, args.toArray)
+  def apply(args: Expr*): Expr = new Expr(op, args:_*)
   /** @inheritdoc */
   override def applies(e: Expr): Boolean = e.head == op
 }
@@ -49,7 +49,7 @@ case class NaryMathOpSpec(op: Expr) extends MathematicaOpSpec {
 /** Quantifier Math operators. */
 case class QuantifiedMathOpSpec(op: Expr) extends MathematicaOpSpec {
   /** Creates a Mathematica expression with quantified variables `vars` and formula `q`. */
-  def apply(vars: Array[Expr], q: Expr): Expr = new Expr(op, Array[Expr](MathematicaOpSpec.list(vars:_*), q))
+  def apply(vars: Array[Expr], q: Expr): Expr = new Expr(op, Array[Expr](MathematicaOpSpec.list(vars:_*), q):_*)
   /** @inheritdoc */
   override def applies(e: Expr): Boolean = e.head == op
 }
@@ -62,7 +62,7 @@ case class NameMathOpSpec(k2m: (NamedSymbol, Array[Expr]) => Expr, applies: Expr
 /** Interpreted functions. */
 case class InterpretedMathOpSpec(op: Expr, fn: Function) extends MathematicaOpSpec {
   /** Creates a Mathematica expression with head `op` and arguments `args`. */
-  def apply(args: Array[Expr]): Expr = new Expr(op, args)
+  def apply(args: Array[Expr]): Expr = new Expr(op, args:_*)
   /** @inheritdoc */
   override def applies(e: Expr): Boolean = e.head == op
 }
@@ -96,7 +96,7 @@ object MathematicaOpSpec {
   def list: NaryMathOpSpec = NaryMathOpSpec(Expr.SYM_LIST)
 
   /** Mathematica function application f(args). */
-  def apply(f: Expr): Seq[Expr] => Expr = (args: Seq[Expr]) => new Expr(f, args.toArray)
+  def apply(f: Expr): Seq[Expr] => Expr = (args: Seq[Expr]) => new Expr(f, args:_*)
 
   //</editor-fold>
 
@@ -120,7 +120,7 @@ object MathematicaOpSpec {
   def func: NameMathOpSpec = NameMathOpSpec(
     (name: NamedSymbol, args: Array[Expr]) => {
       require(args.length <= 2, "Functions expected to have at most 2 arguments (nothing, single argument, or converted pair)")
-      new Expr(MathematicaNameConversion.toMathematica(name), args)
+      new Expr(MathematicaNameConversion.toMathematica(name), args:_*)
     },
     e => MathematicaNameConversion.isConvertibleName(e.head) && e.args().length <= 2
   )
@@ -208,7 +208,7 @@ object MathematicaOpSpec {
 
   def aborted: LiteralMathOpSpec = LiteralMathOpSpec(symbol("$Aborted"))
 
-  def abort: LiteralMathOpSpec = LiteralMathOpSpec(new Expr(symbol("Abort"), Array.empty[Expr]))
+  def abort: LiteralMathOpSpec = LiteralMathOpSpec(new Expr(symbol("Abort"), Array.empty[Expr]:_*))
 
   def failed: LiteralMathOpSpec = LiteralMathOpSpec(symbol("$Failed"))
 
